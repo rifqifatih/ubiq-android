@@ -16,6 +16,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/editText"
+        android:ems="10"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="49dp" />
@@ -34,16 +35,26 @@
         android:layout_height="wrap_content"
         android:text="List"
         android:id="@+id/button"
-        android:layout_below="@+id/editText2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="51dp" />
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_below="@+id/switch1"
+        android:layout_centerHorizontal="true" />
 
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Take a Photo"
         android:id="@+id/button2"
+        android:onClick="takePhoto"
         android:layout_below="@+id/button"
-        android:layout_centerHorizontal="true"
-        android:onClick="takePhoto"/>
+        android:layout_centerHorizontal="true" />
+
+    <Switch
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:id="@+id/switch1"
+        android:layout_marginTop="@dimen/fab_margin"
+        android:layout_below="@+id/editText2"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

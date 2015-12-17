@@ -56,11 +56,21 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -72,6 +82,8 @@ import java.util.concurrent.TimeUnit;
 
 public class CameraFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
+
+    private static final String POST_URL = "http://128.199.156.210:3000/";
 
     /**
      * Conversion from screen rotation to JPEG orientation.
@@ -90,7 +102,7 @@ public class CameraFragment extends Fragment
     /**
      * Tag for the {@link Log}.
      */
-    private static final String TAG = "Camera2BasicFragment";
+    private static final String TAG = "CameraFragment";
 
     /**
      * Camera state: Showing camera preview.
@@ -243,6 +255,7 @@ public class CameraFragment extends Fragment
         @Override
         public void onImageAvailable(ImageReader reader) {
             mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+            mBackgroundHandler.post(new ImageSender(reader.acquireNextImage()));
         }
 
     };
@@ -873,6 +886,64 @@ public class CameraFragment extends Fragment
                             .show();
                 }
                 break;
+            }
+        }
+    }
+
+    private static class ImageSender implements Runnable {
+
+        private final Image mImage;
+
+        public ImageSender(Image image) {
+            mImage = image;
+        }
+
+        @Override
+        public void run() {
+            try {
+                URL url = new URL(POST_URL);
+
+                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
+
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setRequestProperty("User-Agent", System.getProperty("http.agent"));
+                httpURLConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+
+                String image = "TEST";
+                JSONObject  jsonParam = new JSONObject();
+                jsonParam.put("test", image);
+
+                httpURLConnection.setDoOutput(true);
+                DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
+                dataOutputStream.writeBytes(jsonParam.toString());
+                dataOutputStream.flush();
+                dataOutputStream.close();
+
+                int responseCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "Sending 'POST' request to URL : " + url.toString());
+                Log.d(TAG, "Post parameters : " + jsonParam.toString());
+                Log.d(TAG, "Response Code : " + responseCode);
+
+                // TODO any response?
+                BufferedReader bufferedReader = new BufferedReader(
+                        new InputStreamReader(httpURLConnection.getInputStream()));
+
+                String inputLine;
+                StringBuffer response = new StringBuffer();
+
+                while ((inputLine = bufferedReader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+                bufferedReader.close();
+
+                Log.d(TAG, "Response : " + response.toString());
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         }
     }
