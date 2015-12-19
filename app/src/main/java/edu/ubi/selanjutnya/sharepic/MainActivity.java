@@ -10,6 +10,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
     private LocationManager locationManager;
     private String mName;
     private String mSecret;
+    private static String mDeviceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mDeviceId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         nameText = (EditText) findViewById(R.id.editText);
         passText  = (EditText) findViewById(R.id.editText2);
@@ -149,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
                 jsonParam.put("secret", mSecret);
                 jsonParam.put("lon", latitide);
                 jsonParam.put("lat", longitude);
+                jsonParam.put("deviceId", mDeviceId);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());

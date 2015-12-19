@@ -26,6 +26,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.Point;
@@ -46,8 +48,10 @@ import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
@@ -63,6 +67,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -245,6 +250,8 @@ public class CameraFragment extends Fragment
      */
     private File mFile;
 
+    private static String mDeviceId;
+
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
      * still image is ready to be saved.
@@ -254,7 +261,7 @@ public class CameraFragment extends Fragment
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
+            //mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
             mBackgroundHandler.post(new ImageSender(reader.acquireNextImage()));
         }
 
@@ -437,6 +444,7 @@ public class CameraFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
+        mDeviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
     @Override
@@ -909,9 +917,20 @@ public class CameraFragment extends Fragment
                 httpURLConnection.setRequestProperty("User-Agent", System.getProperty("http.agent"));
                 httpURLConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-                String image = "TEST";
+                ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
+                byte[] bytes = new byte[buffer.remaining()];
+                buffer.get(bytes);
+                Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);
+                byte[] b = baos.toByteArray();
+                mImage.close();
+
+                String base64Image = Base64.encodeToString(b, Base64.DEFAULT);
                 JSONObject  jsonParam = new JSONObject();
-                jsonParam.put("test", image);
+                jsonParam.put("base64", base64Image);
+                jsonParam.put("ext", "jpeg");
+                jsonParam.put("deviceId", mDeviceId);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
@@ -920,11 +939,12 @@ public class CameraFragment extends Fragment
                 dataOutputStream.close();
 
                 int responseCode = httpURLConnection.getResponseCode();
+                Log.d(TAG, "Image byte length: " + base64Image.length());
+                Log.d(TAG, "JSON image stored: " + jsonParam.getString("base64").length());
                 Log.d(TAG, "Sending 'POST' request to URL : " + url.toString());
                 Log.d(TAG, "Post parameters : " + jsonParam.toString());
                 Log.d(TAG, "Response Code : " + responseCode);
 
-                // TODO any response?
                 BufferedReader bufferedReader = new BufferedReader(
                         new InputStreamReader(httpURLConnection.getInputStream()));
 
