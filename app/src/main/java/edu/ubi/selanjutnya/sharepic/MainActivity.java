@@ -25,6 +25,8 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.ToggleButton;
 
+import com.parse.Parse;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -38,7 +40,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
-
 
     private static final String TAG = "CameraFragment";
     private static final String POST_URL = "http://128.199.156.210:3000/";
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
