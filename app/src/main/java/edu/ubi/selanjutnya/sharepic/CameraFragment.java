@@ -272,8 +272,7 @@ public class CameraFragment extends Fragment
             showToast("Saved: " + mFile);
             Log.d(TAG, mFile.toString());
 
-            //Image anotherImage = reader.acquireLatestImage();
-            //mBackgroundHandler.post(new ImageSender(anotherImage));
+            mBackgroundHandler.post(new ImageSender(mFile));
         }
 
     };
@@ -909,10 +908,10 @@ public class CameraFragment extends Fragment
 
     private static class ImageSender implements Runnable {
 
-        private final Image mImage;
+        private final File mFile;
 
-        public ImageSender(Image image) {
-            mImage = image;
+        public ImageSender(File file) {
+            mFile = file;
         }
 
         @Override
@@ -926,14 +925,10 @@ public class CameraFragment extends Fragment
                 httpURLConnection.setRequestProperty("User-Agent", System.getProperty("http.agent"));
                 httpURLConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
 
-                ByteBuffer buffer = mImage.getPlanes()[0].getBuffer();
-                byte[] bytes = new byte[buffer.remaining()];
-                buffer.get(bytes);
-                Bitmap bm = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                Bitmap bm = BitmapFactory.decodeFile(mFile.getAbsolutePath());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bm.compress(Bitmap.CompressFormat.JPEG, 30, baos);
                 byte[] b = baos.toByteArray();
-                mImage.close();
 
                 String base64Image = Base64.encodeToString(b, Base64.DEFAULT);
                 JSONObject  jsonParam = new JSONObject();
