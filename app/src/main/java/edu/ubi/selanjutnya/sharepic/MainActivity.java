@@ -79,15 +79,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     @Override
@@ -196,5 +187,10 @@ public class MainActivity extends AppCompatActivity {
         // TODO password & name
         startActivity(intent);
 
+    }
+
+    public void openGrid(View view) {
+        Intent intent = new Intent(this, GridActivity.class);
+        startActivity(intent);
     }
 }

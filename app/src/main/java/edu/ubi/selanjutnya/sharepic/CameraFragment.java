@@ -77,10 +77,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -261,8 +263,17 @@ public class CameraFragment extends Fragment
 
         @Override
         public void onImageAvailable(ImageReader reader) {
-            //mBackgroundHandler.post(new ImageSaver(reader.acquireNextImage(), mFile));
-            mBackgroundHandler.post(new ImageSender(reader.acquireNextImage()));
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMdd_HH_mm_ss");
+            String currentTimeStamp = simpleDateFormat.format(new Date());
+
+            mFile = new File(getActivity().getExternalFilesDir(null), currentTimeStamp + ".jpg");
+            Image image = reader.acquireNextImage();
+            mBackgroundHandler.post(new ImageSaver(image, mFile));
+            showToast("Saved: " + mFile);
+            Log.d(TAG, mFile.toString());
+
+            //Image anotherImage = reader.acquireLatestImage();
+            //mBackgroundHandler.post(new ImageSender(anotherImage));
         }
 
     };
@@ -843,8 +854,6 @@ public class CameraFragment extends Fragment
                 public void onCaptureCompleted(@NonNull CameraCaptureSession session,
                                                @NonNull CaptureRequest request,
                                                @NonNull TotalCaptureResult result) {
-                    showToast("Saved: " + mFile);
-                    Log.d(TAG, mFile.toString());
                     unlockFocus();
                 }
             };
@@ -973,13 +982,7 @@ public class CameraFragment extends Fragment
      */
     private static class ImageSaver implements Runnable {
 
-        /**
-         * The JPEG image
-         */
         private final Image mImage;
-        /**
-         * The file we save the image into.
-         */
         private final File mFile;
 
         public ImageSaver(Image image, File file) {
