@@ -16,10 +16,10 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        DEVICE_TOKEN = (String) ParseInstallation.getCurrentInstallation().get("deviceToken");
-
         Parse.initialize(this,
                 getResources().getString(R.string.parse_application_id),
                 getResources().getString(R.string.parse_client_key));
+
+        DEVICE_TOKEN = (String) ParseInstallation.getCurrentInstallation().get("deviceToken");
     }
 }
