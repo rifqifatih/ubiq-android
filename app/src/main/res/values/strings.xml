@@ -5,6 +5,7 @@
     <string name="description_info">Info</string>
     <string name="request_permission">This sample needs camera permission.</string>
     <string name="camera_error">This device doesn\'t support Camera2 API.</string>
+    <string name="service_base_url">http://128.199.103.223:8080</string>
     <string name="parse_application_id">hOh6Mf9N3DZfQYIuSUUKKN2zFeBbfQCafey0tdYO</string>
     <string name="parse_client_key">tB6Bb1M149yEE3kFdgzCdjjNvAnz1qdt6CmBV1q5</string>
 

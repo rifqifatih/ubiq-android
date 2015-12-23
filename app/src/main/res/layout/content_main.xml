@@ -34,7 +34,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="List"
-        android:onClick="openGrid"
+        android:onClick="openList"
         android:id="@+id/button"
         android:layout_marginTop="@dimen/fab_margin"
         android:layout_below="@+id/switch1"

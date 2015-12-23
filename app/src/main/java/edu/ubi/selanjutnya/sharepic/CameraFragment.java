@@ -22,6 +22,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -48,6 +49,7 @@ import android.media.ImageReader;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
@@ -60,7 +62,6 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.WebView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -89,8 +90,6 @@ import java.util.concurrent.TimeUnit;
 
 public class CameraFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
-
-    private static final String POST_URL = "http://128.199.156.210:3000/";
 
     /**
      * Conversion from screen rotation to JPEG orientation.
@@ -268,11 +267,11 @@ public class CameraFragment extends Fragment
 
             mFile = new File(getActivity().getExternalFilesDir(null), currentTimeStamp + ".jpg");
             Image image = reader.acquireNextImage();
-            mBackgroundHandler.post(new ImageSaver(image, mFile));
+            mBackgroundHandler.post(new ImageSaver(image, mFile, getActivity()));
             showToast("Saved: " + mFile);
             Log.d(TAG, mFile.toString());
 
-            mBackgroundHandler.post(new ImageSender(mFile));
+            mBackgroundHandler.post(new ImageSender(mFile, getResources().getString(R.string.service_base_url) + "/upload"));
         }
 
     };
@@ -481,10 +480,11 @@ public class CameraFragment extends Fragment
     }
 
     private void requestCameraPermission() {
-        if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+        if (FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)
+                || FragmentCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             new ConfirmationDialog().show(getChildFragmentManager(), FRAGMENT_DIALOG);
         } else {
-            FragmentCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},
+            FragmentCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                     REQUEST_CAMERA_PERMISSION);
         }
     }
@@ -616,8 +616,8 @@ public class CameraFragment extends Fragment
      * Opens the camera specified by {@link CameraFragment#mCameraId}.
      */
     private void openCamera(int width, int height) {
-        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
+        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             requestCameraPermission();
             return;
         }
@@ -909,21 +909,24 @@ public class CameraFragment extends Fragment
     private static class ImageSender implements Runnable {
 
         private final File mFile;
+        private final String mUrl;
 
-        public ImageSender(File file) {
+        public ImageSender(File file, String url) {
             mFile = file;
+            mUrl = url;
         }
 
         @Override
         public void run() {
             try {
-                URL url = new URL(POST_URL);
+                URL url = new URL(mUrl);
 
                 HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
 
                 httpURLConnection.setRequestMethod("POST");
                 httpURLConnection.setRequestProperty("User-Agent", System.getProperty("http.agent"));
                 httpURLConnection.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
+                httpURLConnection.setRequestProperty("Content-Type", "application/json");
 
                 Bitmap bm = BitmapFactory.decodeFile(mFile.getAbsolutePath());
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -979,10 +982,12 @@ public class CameraFragment extends Fragment
 
         private final Image mImage;
         private final File mFile;
+        private final Activity mActivity;
 
-        public ImageSaver(Image image, File file) {
+        public ImageSaver(Image image, File file, Activity activity) {
             mImage = image;
             mFile = file;
+            mActivity = activity;
         }
 
         @Override
@@ -991,6 +996,7 @@ public class CameraFragment extends Fragment
             byte[] bytes = new byte[buffer.remaining()];
             buffer.get(bytes);
             FileOutputStream output = null;
+
             try {
                 output = new FileOutputStream(mFile);
                 output.write(bytes);
@@ -998,6 +1004,14 @@ public class CameraFragment extends Fragment
                 e.printStackTrace();
             } finally {
                 mImage.close();
+
+                ContentValues values = new ContentValues();
+                values.put(MediaStore.Images.Media.DATE_TAKEN, System.currentTimeMillis());
+                values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+                values.put(MediaStore.MediaColumns.DATA, mFile.toString());
+
+                mActivity.getBaseContext().getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
                 if (null != output) {
                     try {
                         output.close();
@@ -1069,7 +1083,7 @@ public class CameraFragment extends Fragment
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             FragmentCompat.requestPermissions(parent,
-                                    new String[]{Manifest.permission.CAMERA},
+                                    new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE},
                                     REQUEST_CAMERA_PERMISSION);
                         }
                     })

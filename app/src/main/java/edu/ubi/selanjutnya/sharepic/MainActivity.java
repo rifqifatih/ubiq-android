@@ -1,18 +1,14 @@
 package edu.ubi.selanjutnya.sharepic;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,9 +19,6 @@ import android.view.MenuItem;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
-import android.widget.ToggleButton;
-
-import com.parse.Parse;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,7 +35,6 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "CameraFragment";
-    private static final String POST_URL = "http://128.199.156.210:3000/";
 
     private static final int REQUEST_CODE = 1;
     private final AppCompatActivity thisActivity = this;
@@ -115,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(Void... params) {
             try {
-                URL url = new URL(POST_URL);
+                URL url = new URL(getResources().getString(R.string.service_base_url) + "/user/register");
 
                 HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
                 httpURLConnection.setRequestMethod("POST");
@@ -191,8 +183,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void openGrid(View view) {
-        Intent intent = new Intent(this, GridActivity.class);
+    public void openList(View view) {
+        Intent intent = new Intent(this, ListViewLoader.class);
         startActivity(intent);
     }
 }
