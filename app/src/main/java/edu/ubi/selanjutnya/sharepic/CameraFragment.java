@@ -64,6 +64,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.parse.ParseInstallation;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -250,8 +252,6 @@ public class CameraFragment extends Fragment
      * This is the output file for our picture.
      */
     private File mFile;
-
-    private static String mDeviceId;
 
     /**
      * This a callback object for the {@link ImageReader}. "onImageAvailable" will be called when a
@@ -453,7 +453,6 @@ public class CameraFragment extends Fragment
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mFile = new File(getActivity().getExternalFilesDir(null), "pic.jpg");
-        mDeviceId = Settings.Secure.getString(getContext().getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
     @Override
@@ -937,7 +936,7 @@ public class CameraFragment extends Fragment
                 JSONObject  jsonParam = new JSONObject();
                 jsonParam.put("base64", base64Image);
                 jsonParam.put("ext", "jpeg");
-                jsonParam.put("deviceId", mDeviceId);
+                jsonParam.put("deviceId", MainActivity.mDeviceId);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());

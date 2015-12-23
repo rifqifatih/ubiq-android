@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import com.parse.ParseInstallation;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -42,7 +44,7 @@ public class ListViewLoader extends ListActivity {
         listAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item, urls);
         setListAdapter(listAdapter);
 
-        new RetrieveTask().execute(Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID));
+        new RetrieveTask().execute(MainActivity.mDeviceId);
     }
 
     @Override
