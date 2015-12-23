@@ -936,7 +936,7 @@ public class CameraFragment extends Fragment
                 JSONObject  jsonParam = new JSONObject();
                 jsonParam.put("base64", base64Image);
                 jsonParam.put("ext", "jpeg");
-                jsonParam.put("deviceId", MainActivity.mDeviceId);
+                jsonParam.put("deviceId", MyApplication.DEVICE_TOKEN);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());

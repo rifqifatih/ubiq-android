@@ -44,7 +44,7 @@ public class ListViewLoader extends ListActivity {
         listAdapter = new ArrayAdapter<String>(this, R.layout.simple_list_item, urls);
         setListAdapter(listAdapter);
 
-        new RetrieveTask().execute(MainActivity.mDeviceId);
+        new RetrieveTask().execute(MyApplication.DEVICE_TOKEN);
     }
 
     @Override

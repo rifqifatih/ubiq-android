@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     private LocationManager locationManager;
     private String mName;
     private String mSecret;
-    public static String mDeviceId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        mDeviceId = (String) ParseInstallation.getCurrentInstallation().get("deviceToken");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Criteria criteria = new Criteria();
         String bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true));
@@ -140,7 +138,8 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         }
         locationManager.removeUpdates(this);
 
-        Log.d("Test", "Location changed");
+        Log.d("LOC", "Location updated");
+        Toast.makeText(this, "Location updated", Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -182,7 +181,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                                 REQUEST_CODE);
                     }
                 }
-
                 Location location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
                 Double latitide = location.getLatitude();
                 Double longitude = location.getLongitude();
@@ -192,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 jsonParam.put("secret", mSecret);
                 jsonParam.put("lon", latitide);
                 jsonParam.put("lat", longitude);
-                jsonParam.put("deviceId", mDeviceId);
+                jsonParam.put("deviceId", MyApplication.DEVICE_TOKEN);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());
@@ -235,7 +233,6 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
         Intent intent = new Intent(this, CameraActivity.class);
         // TODO password & name
         startActivity(intent);
-
     }
 
     public void openList(View view) {
