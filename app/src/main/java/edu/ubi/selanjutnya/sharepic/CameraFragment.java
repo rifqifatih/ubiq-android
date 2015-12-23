@@ -46,6 +46,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -615,10 +616,12 @@ public class CameraFragment extends Fragment
      * Opens the camera specified by {@link CameraFragment#mCameraId}.
      */
     private void openCamera(int width, int height) {
-        if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
-                getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            requestCameraPermission();
-            return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (getActivity().checkSelfPermission(Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED ||
+                    getActivity().checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestCameraPermission();
+                return;
+            }
         }
         setUpCameraOutputs(width, height);
         configureTransform(width, height);
@@ -936,7 +939,7 @@ public class CameraFragment extends Fragment
                 JSONObject  jsonParam = new JSONObject();
                 jsonParam.put("base64", base64Image);
                 jsonParam.put("ext", "jpeg");
-                jsonParam.put("deviceId", MyApplication.DEVICE_TOKEN);
+                jsonParam.put("deviceId", MainActivity.DEVICE_TOKEN);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());

@@ -22,6 +22,8 @@ import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.Toast;
 
+import com.parse.ParseInstallation;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -37,6 +39,7 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity implements LocationListener {
 
     private static final String TAG = "CameraFragment";
+    public static String DEVICE_TOKEN;
 
     private static final int REQUEST_CODE = 1;
     private final AppCompatActivity thisActivity = this;
@@ -51,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DEVICE_TOKEN = (String) ParseInstallation.getCurrentInstallation().get("deviceToken");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -186,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements LocationListener 
                 jsonParam.put("secret", mSecret);
                 jsonParam.put("lon", latitide);
                 jsonParam.put("lat", longitude);
-                jsonParam.put("deviceId", MyApplication.DEVICE_TOKEN);
+                jsonParam.put("deviceId", MainActivity.DEVICE_TOKEN);
 
                 httpURLConnection.setDoOutput(true);
                 DataOutputStream dataOutputStream = new DataOutputStream(httpURLConnection.getOutputStream());

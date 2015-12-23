@@ -10,8 +10,6 @@ import com.parse.ParseInstallation;
  */
 public class MyApplication extends Application {
 
-    public static String DEVICE_TOKEN;
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -19,7 +17,5 @@ public class MyApplication extends Application {
         Parse.initialize(this,
                 getResources().getString(R.string.parse_application_id),
                 getResources().getString(R.string.parse_client_key));
-
-        DEVICE_TOKEN = (String) ParseInstallation.getCurrentInstallation().get("deviceToken");
     }
 }
